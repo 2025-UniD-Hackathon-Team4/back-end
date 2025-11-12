@@ -45,15 +45,14 @@ jobs:
           echo "✅ Uploading to EC2..."
 
           # ✅ JAR 전송
-          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app.jar
+          scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app/app.jar
 
-          echo "✅ Restarting server app..."
-
-          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << 'EOF'
-            pkill -f app.jar || true
-            sleep 3
-            nohup /usr/bin/java -jar /home/$EC2_USERNAME/app.jar > /home/$EC2_USERNAME/app.log 2>&1 &
-            echo '✅ New app started!'
+          ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
+          mkdir -p /home/$EC2_USERNAME/app
+          pkill -f app.jar || true
+          sleep 3
+          nohup /usr/bin/java -jar /home/$EC2_USERNAME/app/app.jar > /home/$EC2_USERNAME/app/app.log 2>&1 &
+          echo '✅ New app started!'
           EOF
 
           rm -f private_key.pem
