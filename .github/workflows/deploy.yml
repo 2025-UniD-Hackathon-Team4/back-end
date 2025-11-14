@@ -68,5 +68,5 @@ jobs:
 
           echo '✅ New app started!'
           EOF
-  
+          
           rm -f private_key.pem
