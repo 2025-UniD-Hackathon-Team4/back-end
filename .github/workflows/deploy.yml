@@ -2,8 +2,8 @@ name: Simple CI/CD (Direct Secrets Injection)
 
 on:
   push:
-    branches: [ "main" ]     # main 브랜치에 푸시/병합 시 자동 실행
-  workflow_dispatch:          # 수동 실행 가능
+    branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
   build-and-deploy:
@@ -26,24 +26,26 @@ jobs:
         run: ./gradlew clean build -x test
 
       - name: Copy jar to EC2 and restart app
-        # 이 단계의 환경 변수로 Secrets 값을 가져옵니다.
         env:
           EC2_SSH_KEY: ${{ secrets.EC2_SSH_KEY }}
           EC2_USERNAME: ${{ secrets.EC2_USERNAME }}
           EC2_HOST: ${{ secrets.EC2_HOST }}
 
-          # ⭐ [필수] Spring Boot에 필요한 DB 및 AWS 환경 변수를 이 단계에서 선언
+          # DB / AWS 환경 변수
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           AWS_REGION: ${{ secrets.AWS_REGION }}
+
 
         run: |
           echo "🔑 Setting up SSH key..."
           echo "$EC2_SSH_KEY" > private_key.pem
           chmod 600 private_key.pem
 
-          # 빌드된 JAR 파일 찾기 (plain.jar 제외)
+          # 빌드된 JAR 찾기
           jar_file=$(find build/libs -name '*.jar' ! -name '*plain.jar' | head -n 1)
 
           if [ ! -f "$jar_file" ]; then
@@ -53,30 +55,32 @@ jobs:
 
           echo "✅ Found jar: $jar_file"
           echo "✅ Uploading to EC2..."
-
-          # JAR 전송 (SCP)
           scp -i private_key.pem -o StrictHostKeyChecking=no "$jar_file" $EC2_USERNAME@$EC2_HOST:/home/$EC2_USERNAME/app/app.jar
 
-          # SSH 접속 및 환경 변수 주입 후 앱 재실행
           echo "✅ Restarting application on EC2..."
           ssh -i private_key.pem -o StrictHostKeyChecking=no $EC2_USERNAME@$EC2_HOST << EOF
-          
+
           # 앱 디렉토리 생성
           mkdir -p /home/$EC2_USERNAME/app
-          
+
           # 기존 프로세스 종료
           pkill -f app.jar || true
           sleep 3
+
+          # ⭐ 핵심: 모든 환경 변수를 export하여 Java 프로세스에 주입 ⭐
+          export DB_URL="${DB_URL}"
+          export DB_USERNAME="${DB_USERNAME}"
+          export DB_PASSWORD="${DB_PASSWORD}"
+          export AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}"
+          export AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}"
+          export AWS_REGION="${AWS_REGION}"
           
-          # ⭐ 핵심: 환경 변수를 Java 실행 명령어 앞에 직접 붙여서 주입합니다. ⭐
-          DB_PASSWORD="${DB_PASSWORD}" \
-          AWS_ACCESS_KEY_ID="${AWS_ACCESS_KEY_ID}" \
-          AWS_SECRET_ACCESS_KEY="${AWS_SECRET_ACCESS_KEY}" \
-          AWS_REGION="${AWS_REGION}" \
+
+          # 애플리케이션 실행
           nohup /usr/bin/java -jar /home/$EC2_USERNAME/app/app.jar > /home/$EC2_USERNAME/app/app.log 2>&1 &
-          
+
           echo '✅ New app started!'
           EOF
 
-          # Private Key 파일 삭제
+  # Private Key 삭제
           rm -f private_key.pem
