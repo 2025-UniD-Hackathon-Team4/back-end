@@ -34,8 +34,7 @@ public class OAuth2LoginSuccessHandler extends SimpleUrlAuthenticationSuccessHan
 
         // 세션에 User 저장
         request.getSession().setAttribute("LOGIN_USER", user);
-        String targetUrl = "casuon://oauth2redirect/naver";
-
+        String targetUrl = "http://54.116.1.156/login-success?username=" + username;
         getRedirectStrategy().sendRedirect(request, response, targetUrl);
     }
 }
