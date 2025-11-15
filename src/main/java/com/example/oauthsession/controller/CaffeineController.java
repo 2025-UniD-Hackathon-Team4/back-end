@@ -32,7 +32,7 @@ public class CaffeineController {
             summary = "카페인 섭취 기록 추가",
             description = "사용자가 특정 시간, 메뉴, 매장 정보를 포함하여 카페인 섭취 기록을 등록 후 값 반환"
     )
-    public ApiResponse<CaffeineResponse.AddCaffeineResponseDto> addCaffeineIntake(CaffeineRequest.AddCaffeineRequestDto request,
+    public ApiResponse<CaffeineResponse.AddCaffeineResponseDto> addCaffeineIntake(@RequestBody CaffeineRequest.AddCaffeineRequestDto request,
                                                                                   HttpSession session){
         User loginUser = (User) session.getAttribute("LOGIN_USER"); // 세션에 저장한 유저 정보
         log.info("loginUser : {}", loginUser);
