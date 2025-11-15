@@ -6,16 +6,18 @@ import com.example.oauthsession.entity.User;
 import com.example.oauthsession.repository.DaySummariesRepository;
 import com.example.oauthsession.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
 
 
-
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -26,7 +28,8 @@ public class DaySummariesService {
 
     public DaySummaries updateTodaySleepGoal(User user, String sleepGoal) {
 
-        LocalDate today = LocalDate.now();
+        LocalDate today = LocalDate.now(ZoneId.of("Asia/Seoul"));
+        log.info("time:{}",today);
 
         // 오늘 날짜 데이터 조회
         DaySummaries todaySummary = daySummariesRepository
