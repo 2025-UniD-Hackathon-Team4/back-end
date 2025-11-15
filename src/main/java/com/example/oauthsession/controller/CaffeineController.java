@@ -9,10 +9,14 @@ import com.example.oauthsession.entity.User;
 import com.example.oauthsession.repository.UserRepository;
 import com.example.oauthsession.service.CaffeineService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDate;
 
 @CrossOrigin(origins = "*")
 @Slf4j
@@ -41,6 +45,21 @@ public class CaffeineController {
         return ApiResponse.onSuccess(addCaffeineResponseDto);
     }
 
+    @Operation(
+            summary = "날짜별 카페인 섭취량 조회",
+            description = "날짜별 카페인 섭취량을 조회합니다, 날짜를 입력해주세요"
+    )
+    @Parameter(
+            description = "조회할 날짜 (yyyy-MM-dd 형식)",
+            example = "2025-11-15"
+    )
+    @GetMapping("/caffeine/caffeine/byDay")
+    public ApiResponse<CaffeineResponse.CaffeineByDayResponseDto> getCaffeineByDay(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date,
+                                                                                   HttpSession session){
+        User user = getUser(session);
+        return ApiResponse.onSuccess(caffeineService.getCaffeineByDay(user, date));
+    }
+
     /**
      * 오늘 총 카페인 섭취량
      * GET /caffeine/today?userId=1
@@ -66,5 +85,15 @@ public class CaffeineController {
     @GetMapping("/caffeine/monthly")
     public CaffeinePeriodResponse getMonthly(@RequestParam Long userId) {
         return caffeineService.getMonthlyCaffeine(userId);
+    }
+
+    private User getUser(HttpSession session) {
+        User loginUser = (User) session.getAttribute("LOGIN_USER"); // 세션에 저장한 유저 정보
+        log.info("loginUser : {}", loginUser);
+
+        if(loginUser == null){
+            loginUser = userRepository.findById(1L).orElseThrow();
+        }
+        return loginUser;
     }
 }

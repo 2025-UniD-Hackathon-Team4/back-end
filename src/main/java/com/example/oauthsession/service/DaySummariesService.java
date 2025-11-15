@@ -46,15 +46,20 @@ public class DaySummariesService {
         return daySummariesRepository.save(todaySummary);
     }
 
-    public String getSleepGoal(User user) {
-
-        LocalDate today = LocalDate.now();
+    public String getSleepGoal(User user, LocalDate date) {
 
         // 오늘 날짜 데이터 조회
         DaySummaries todaySummary = daySummariesRepository
-                .findByUserAndDate(user, today)
+                .findByUserAndDate(user, date)
                 .orElseThrow();
         return todaySummary.getSleepGoal();
+    }
+
+    public Integer getCondtionTemp(User user, LocalDate date) {
+        DaySummaries daySummaries = daySummariesRepository
+                .findByUserAndDate(user, date)
+                .orElseThrow();
+        return daySummaries.getConditionScore();
     }
 
 

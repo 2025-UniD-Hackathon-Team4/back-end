@@ -27,4 +27,7 @@ public interface CaffeineIntakesRepository extends JpaRepository<CaffeineIntakes
     Integer sumCaffeineMgByUserAndPeriod(@Param("user") User user,
                                          @Param("start") LocalDateTime start,
                                          @Param("end") LocalDateTime end);
+
+    List<CaffeineIntakes> findAllByUserAndDateTimeBetween(User user, LocalDateTime start, LocalDateTime end);
+
 }
