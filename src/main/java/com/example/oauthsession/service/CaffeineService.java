@@ -1,7 +1,9 @@
 package com.example.oauthsession.service;
 
 import com.example.oauthsession.dto.request.CaffeineRequest;
+import com.example.oauthsession.dto.response.CaffeinePeriodResponse;
 import com.example.oauthsession.dto.response.CaffeineResponse;
+import com.example.oauthsession.dto.response.CaffeineTodayResponse;
 import com.example.oauthsession.entity.CaffeineIntakes;
 import com.example.oauthsession.entity.MenuItem;
 import com.example.oauthsession.entity.User;
@@ -9,9 +11,13 @@ import com.example.oauthsession.repository.CaffeineIntakesRepository;
 import com.example.oauthsession.repository.MenuItemRepository;
 import com.example.oauthsession.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.temporal.ChronoUnit;
 
 @Service
 @Transactional
@@ -51,4 +57,75 @@ public class CaffeineService {
                 .build();
     }
 
+    private final CaffeineIntakesRepository caffeineIntakesRepository;
+
+    private static final ZoneId KST = ZoneId.of("Asia/Seoul");
+
+    private User getUserOrThrow(Long userId) {
+        return userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + userId));
+    }
+
+    /**
+     * 오늘 하루 총 카페인 섭취량
+     */
+    public CaffeineTodayResponse getTodayCaffeine(Long userId) {
+        User user = getUserOrThrow(userId);
+
+        LocalDate today = LocalDate.now(KST);
+        LocalDateTime start = today.atStartOfDay();
+        LocalDateTime end = today.plusDays(1).atStartOfDay();
+
+        int total = caffeineIntakesRepository
+                .sumCaffeineMgByUserAndPeriod(user, start, end);
+
+        return new CaffeineTodayResponse(today, total);
+    }
+
+    /**
+     * 최근 7일(오늘 포함) 기준 주간 통계
+     * 예) 오늘이 15일이면 9~15일 데이터 기준
+     */
+    public CaffeinePeriodResponse getWeeklyCaffeine(Long userId) {
+        User user = getUserOrThrow(userId);
+
+        LocalDate today = LocalDate.now(KST);
+        LocalDate startDate = today.minusDays(6);   // 7일 치 (today 포함)
+        LocalDate endDate = today;
+
+        LocalDateTime start = startDate.atStartOfDay();
+        LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+
+        int total = caffeineIntakesRepository
+                .sumCaffeineMgByUserAndPeriod(user, start, end);
+
+        long days = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1)); // 7일
+        double avgPerDay = days > 0 ? (double) total / days : 0.0;
+
+        return new CaffeinePeriodResponse(startDate, endDate, total, avgPerDay);
+    }
+
+    /**
+     * 이번 달 기준 월간 통계
+     * 예) 11월이면 11/1 ~ 11/30 or 11/31 까지
+     */
+    public CaffeinePeriodResponse getMonthlyCaffeine(Long userId) {
+        User user = getUserOrThrow(userId);
+
+        LocalDate today = LocalDate.now(KST);
+        LocalDate firstDay = today.withDayOfMonth(1);
+        LocalDate firstDayNextMonth = firstDay.plusMonths(1);
+        LocalDate lastDay = firstDayNextMonth.minusDays(1);
+
+        LocalDateTime start = firstDay.atStartOfDay();
+        LocalDateTime end = firstDayNextMonth.atStartOfDay();
+
+        int total = caffeineIntakesRepository
+                .sumCaffeineMgByUserAndPeriod(user, start, end);
+
+        long days = ChronoUnit.DAYS.between(firstDay, firstDayNextMonth); // 이번 달 날짜 수
+        double avgPerDay = days > 0 ? (double) total / days : 0.0;
+
+        return new CaffeinePeriodResponse(firstDay, lastDay, total, avgPerDay);
+    }
 }

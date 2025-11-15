@@ -5,8 +5,11 @@ import com.example.oauthsession.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
+import java.util.List;
 import java.util.Optional;
 
 public interface DaySummariesRepository extends JpaRepository<DaySummaries, Long> {
     Optional<DaySummaries> findByUserAndDate(User user, LocalDate date);
+    List<DaySummaries> findByUserAndDateBetween(User user, LocalDate start, LocalDate end);
+
 }

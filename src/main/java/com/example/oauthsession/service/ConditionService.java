@@ -1,7 +1,7 @@
 package com.example.oauthsession.service;
 
-import com.example.oauthsession.dto.request.DailySummaryRequest;
-import com.example.oauthsession.dto.response.DailySummaryResponse;
+import com.example.oauthsession.dto.request.DaySummariesRequest;
+import com.example.oauthsession.dto.response.DaySummaryResponse;
 import com.example.oauthsession.entity.CaffeineIntakes;
 import com.example.oauthsession.entity.DaySummaries;
 import com.example.oauthsession.entity.User;
@@ -33,7 +33,7 @@ public class ConditionService {
 
     private static final ZoneId KST = ZoneId.of("Asia/Seoul");
 
-    public Mono<DailySummaryResponse> createDailySummary(DailySummaryRequest request, HttpSession session) {
+    public Mono<DaySummaryResponse> createDailySummary(DaySummariesRequest request, HttpSession session) {
         User user = userRepository.findById(request.userId())
                 .orElseThrow(() -> new IllegalArgumentException("User not found: " + request.userId()));
 
@@ -99,7 +99,7 @@ public class ConditionService {
 
                     DaySummaries saved = daySummariesRepository.save(summary);
 
-                    return new DailySummaryResponse(
+                    return new DaySummaryResponse(
                             saved.getId(),
                             conditionScore,
                             conditionSummary

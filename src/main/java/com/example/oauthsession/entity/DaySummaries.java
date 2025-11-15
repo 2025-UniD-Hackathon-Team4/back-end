@@ -20,6 +20,8 @@ public class DaySummaries {
 
     private LocalDateTime sleepEndAt;
 
+    private String sleepGoal;
+
     private int freshness;
 
     private int prevDayCaffeine;
