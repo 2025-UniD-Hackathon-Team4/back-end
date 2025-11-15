@@ -19,7 +19,7 @@ public class CaffeineRequest {
                 description = "섭취 시간 (yyyy-MM-dd'T'HH:mm:ss 형식)",
                 example = "2025-11-15T11:23:45"
         )
-        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+        @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Asia/Seoul")
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
          LocalDateTime dateTime;
 

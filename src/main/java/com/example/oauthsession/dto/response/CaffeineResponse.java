@@ -6,6 +6,7 @@ import lombok.*;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public class CaffeineResponse {
     @Getter
@@ -25,5 +26,15 @@ public class CaffeineResponse {
         String size;
         Integer caffeineMg;
         String menuName;
+    }
+
+    @Getter
+    @Setter
+    @Builder
+    @AllArgsConstructor
+    @NoArgsConstructor
+    public static class CaffeineByDayResponseDto{
+        List<AddCaffeineResponseDto> caffeineIntakes;
+        private int totalCaffeineMg;
     }
 }

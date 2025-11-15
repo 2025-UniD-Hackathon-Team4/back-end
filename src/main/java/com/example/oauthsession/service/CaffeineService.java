@@ -16,8 +16,11 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @Transactional
@@ -127,5 +130,31 @@ public class CaffeineService {
         double avgPerDay = days > 0 ? (double) total / days : 0.0;
 
         return new CaffeinePeriodResponse(firstDay, lastDay, total, avgPerDay);
+    }
+
+    public CaffeineResponse.CaffeineByDayResponseDto getCaffeineByDay(User user, LocalDate date) {
+        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
+
+        List<CaffeineIntakes> intakes = caffeineIntakesRepository.findAllByUserAndDateTimeBetween(user, startOfDay, endOfDay);
+
+        List<CaffeineResponse.AddCaffeineResponseDto> caffeineDtos = intakes.stream()
+                .map(intake -> CaffeineResponse.AddCaffeineResponseDto.builder()
+                        .dateTime(intake.getDateTime())
+                        .storeName(intake.getMenuItem().getStores().getStoreName())
+                        .menuName(intake.getMenuItem().getMenuName())
+                        .size(intake.getMenuItem().getSize())
+                        .caffeineMg(intake.getCaffeineMg())
+                        .build())
+                .collect(Collectors.toList());
+
+        int totalCaffeine = caffeineDtos.stream()
+                .mapToInt(CaffeineResponse.AddCaffeineResponseDto::getCaffeineMg)
+                .sum();
+
+        return CaffeineResponse.CaffeineByDayResponseDto.builder()
+                .caffeineIntakes(caffeineDtos)
+                .totalCaffeineMg(totalCaffeine)
+                .build();
     }
 }

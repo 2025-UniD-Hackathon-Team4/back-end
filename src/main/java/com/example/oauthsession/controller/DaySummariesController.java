@@ -10,11 +10,15 @@ import com.example.oauthsession.repository.UserRepository;
 import com.example.oauthsession.service.ConditionService;
 import com.example.oauthsession.service.DaySummariesService;
 import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
+
+import java.time.LocalDate;
 
 @Slf4j
 @RestController
@@ -47,12 +51,15 @@ public class DaySummariesController {
             summary = "목표 취침 시간 조회",
             description = "오늘의 목표 취침 시간을 조회합니다"
     )
+    @Parameter(
+            description = "조회할 날짜 (yyyy-MM-dd 형식)",
+            example = "2025-11-15"
+    )
     @GetMapping("/api/sleepGoal")
-    public ApiResponse<String> getSleepGoal(HttpSession session){
+    public ApiResponse<String> getSleepGoal(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, HttpSession session){
         User user = getUser(session);
 
-        daySummariesService.getSleepGoal(user);
-        return ApiResponse.onSuccess(daySummariesService.getSleepGoal(user));
+        return ApiResponse.onSuccess(daySummariesService.getSleepGoal(user,date));
     }
 
     @Operation(
@@ -75,7 +82,20 @@ public class DaySummariesController {
         User user = getUser(session);
         SleepAverageResponse monthlySleep = daySummariesService.getMonthlySleep(user);
         return ApiResponse.onSuccess(monthlySleep);
+    }
 
+    @Operation(
+            summary = "날짜별 컨디션 온도 조회",
+            description = "날짜별 컨디션 온도를 조회합니다, 날짜를 입력해주세요"
+    )
+    @Parameter(
+            description = "조회할 날짜 (yyyy-MM-dd 형식)",
+            example = "2025-11-15"
+    )
+    @GetMapping("api/conditionTemp")
+    public ApiResponse<Integer> getConditionTemp(@RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date, HttpSession session){
+        User user = getUser(session);
+        return ApiResponse.onSuccess(daySummariesService.getCondtionTemp(user,date));
     }
 
     private User getUser(HttpSession session) {
