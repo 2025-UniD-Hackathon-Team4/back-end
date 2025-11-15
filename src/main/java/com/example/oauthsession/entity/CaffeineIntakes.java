@@ -24,4 +24,6 @@ public class CaffeineIntakes {
 
     private LocalDateTime dateTime;
 
+    private Integer caffeineMg;
+
 }
