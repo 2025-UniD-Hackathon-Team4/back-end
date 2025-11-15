@@ -142,19 +142,25 @@ public class CaffeineService {
     }
 
     public CaffeineResponse.CaffeineByDayResponseDto getCaffeineByDay(User user, LocalDate date) {
-        LocalDateTime startOfDay = date.atStartOfDay();
+        LocalDate today = LocalDate.now(KST);
+        LocalDateTime startOfDay = today.atStartOfDay();
         LocalDateTime endOfDay = date.atTime(LocalTime.MAX);
 
         List<CaffeineIntakes> intakes = caffeineIntakesRepository.findAllByUserAndDateTimeBetween(user, startOfDay, endOfDay);
 
         List<CaffeineResponse.AddCaffeineResponseDto> caffeineDtos = intakes.stream()
-                .map(intake -> CaffeineResponse.AddCaffeineResponseDto.builder()
-                        .dateTime(intake.getDateTime())
-                        .storeName(intake.getMenuItem().getStores().getStoreName())
-                        .menuName(intake.getMenuItem().getMenuName())
-                        .size(intake.getMenuItem().getSize())
-                        .caffeineMg(intake.getCaffeineMg())
-                        .build())
+                .map(intake -> {
+                    // RDS UTC 기준 LocalDateTime을 KST로 변환
+                    LocalDateTime kstDateTime = intake.getDateTime().plusHours(9);
+
+                    return CaffeineResponse.AddCaffeineResponseDto.builder()
+                            .dateTime(kstDateTime)
+                            .storeName(intake.getMenuItem().getStores().getStoreName())
+                            .menuName(intake.getMenuItem().getMenuName())
+                            .size(intake.getMenuItem().getSize())
+                            .caffeineMg(intake.getCaffeineMg())
+                            .build();
+                })
                 .collect(Collectors.toList());
 
         int totalCaffeine = caffeineDtos.stream()
