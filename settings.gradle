@@ -1,5 +1,1 @@
-<<<<<<< HEAD
-rootProject.name = 'security'
-=======
 rootProject.name = 'OAuthSession'
->>>>>>> f3f5176 (implement Oauth2)
