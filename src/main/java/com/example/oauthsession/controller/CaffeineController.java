@@ -5,6 +5,7 @@ import com.example.oauthsession.dto.request.CaffeineRequest;
 import com.example.oauthsession.dto.response.CaffeinePeriodResponse;
 import com.example.oauthsession.dto.response.CaffeineResponse;
 import com.example.oauthsession.dto.response.CaffeineTodayResponse;
+import com.example.oauthsession.dto.response.SleepAverageResponse;
 import com.example.oauthsession.entity.User;
 import com.example.oauthsession.repository.UserRepository;
 import com.example.oauthsession.service.CaffeineService;
@@ -17,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @CrossOrigin(origins = "*")
 @Slf4j
@@ -85,6 +87,28 @@ public class CaffeineController {
     @GetMapping("/caffeine/monthly")
     public CaffeinePeriodResponse getMonthly(@RequestParam Long userId) {
         return caffeineService.getMonthlyCaffeine(userId);
+    }
+
+    @Operation(
+            summary = "4개월간 평균 카페인량 조회",
+            description = "4개월간 평균 카페인량을 조회합니다"
+    )
+    @GetMapping("/caffeine/fourMonths")
+    public ApiResponse<List<CaffeinePeriodResponse>> getFourMonthSleep(HttpSession session){
+        User user = getUser(session);
+        List<CaffeinePeriodResponse> mothlyCaffeine = caffeineService.getLastFourMonthsCaffeine(user);
+        return ApiResponse.onSuccess(mothlyCaffeine);
+    }
+
+    @Operation(
+            summary = "4주간 평균 카페인량 조회",
+            description = "4주간 평균 카페인량을 조회합니다"
+    )
+    @GetMapping("/caffeine/fourWeeks")
+    public ApiResponse<List<CaffeinePeriodResponse>> getFourWeekSleep(HttpSession session){
+        User user = getUser(session);
+        List<CaffeinePeriodResponse> weeklyCaffeine = caffeineService.getLastFourWeeksCaffeine(user);
+        return ApiResponse.onSuccess(weeklyCaffeine);
     }
 
     private User getUser(HttpSession session) {
