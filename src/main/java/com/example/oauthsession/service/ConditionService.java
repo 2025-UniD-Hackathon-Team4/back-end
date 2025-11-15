@@ -141,7 +141,7 @@ public class ConditionService {
                 - 수면 시작 시각: %s
                 - 수면 종료 시각: %s
                 - 총 수면 시간(분): %d
-                - 기상 직후 상쾌함(1~5): %d
+                - 기상 직후 상쾌함(1~3): %d
                 """.formatted(
                 yesterday,
                 totalCaffeine,
