@@ -35,6 +35,14 @@ public class DaySummariesController {
                                                        HttpSession session) {
         return conditionService.createDailySummary(request, session);
     }
+    // ⭐ 프론트엔드에서 LLM 문장만 가져가기 위한 GET API
+    @GetMapping("/api/daily-summary/summary")
+    public Mono<String> getConditionSummary(
+            @RequestParam Long userId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate date
+    ) {
+        return conditionService.getConditionSummary(userId, date);
+    }
 
     @Operation(
             summary = "목표 취침 시간 등록",
