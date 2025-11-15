@@ -22,8 +22,23 @@ public class CaffeineRequest {
         @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
         @DateTimeFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
          LocalDateTime dateTime;
+
+        @Schema(
+                description = "가게 이름",
+                example = "투썸플레이스"
+        )
          String storeName;
+
+         @Schema(
+                description = "사이즈",
+                example = "regular"
+        )
          String size;
+
+        @Schema(
+                description = "메뉴 이름",
+                example = "카페라떼"
+        )
          String menuName;
     }
 

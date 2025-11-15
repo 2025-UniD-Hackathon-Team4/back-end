@@ -14,4 +14,6 @@ public interface CaffeineIntakesRepository extends JpaRepository<CaffeineIntakes
     List<CaffeineIntakes> findByUserAndDateTimeBetween(User user,
                                                        LocalDateTime start,
                                                        LocalDateTime end);
+
+
 }
