@@ -11,6 +11,7 @@ import com.example.oauthsession.repository.CaffeineIntakesRepository;
 import com.example.oauthsession.repository.MenuItemRepository;
 import com.example.oauthsession.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,6 +23,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @Transactional
 @RequiredArgsConstructor
@@ -32,6 +34,13 @@ public class CaffeineService {
 
     public CaffeineResponse.AddCaffeineResponseDto recordCaffeineIntake(CaffeineRequest.AddCaffeineRequestDto request,
                                                 User user){
+
+        log.info("request : size={}, dateTime={}, menuName={}, storeName={}",
+                request.getSize(),
+                request.getDateTime(),
+                request.getMenuName(),
+                request.getStoreName()
+        );
 
         MenuItem menuItem = menuItemRepository
                 .findByStores_StoreNameAndMenuNameAndSize(
