@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.ZoneId;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -139,6 +140,82 @@ public class CaffeineService {
         double avgPerDay = days > 0 ? (double) total / days : 0.0;
 
         return new CaffeinePeriodResponse(firstDay, lastDay, total, avgPerDay);
+    }
+
+    //4주간 카페인
+    public List<CaffeinePeriodResponse> getLastFourWeeksCaffeine(User user) {
+
+        List<CaffeinePeriodResponse> fourWeeksData = new ArrayList<>();
+        LocalDate today = LocalDate.now(KST);
+
+        // i=0 (1주차)부터 i=3 (4주차)까지 반복
+        for (int i = 0; i < 4; i++) {
+
+            // 해당 주차의 종료일과 시작일 계산
+            // i=0: 오늘 ~ 6일 전
+            // i=1: 7일 전 ~ 13일 전
+            LocalDate endDate = today.minusDays(i * 7);
+            LocalDate startDate = endDate.minusDays(6);
+
+            // LocalDateTime으로 변환 (endDate는 다음 날 0시까지 포함)
+            LocalDateTime start = startDate.atStartOfDay();
+            LocalDateTime end = endDate.plusDays(1).atStartOfDay();
+
+            int total = caffeineIntakesRepository
+                    .sumCaffeineMgByUserAndPeriod(user, start, end);
+
+            // 기간 계산 (7일)
+            long days = ChronoUnit.DAYS.between(startDate, endDate.plusDays(1));
+            double avgPerDay = days > 0 ? (double) total / days : 0.0;
+
+            CaffeinePeriodResponse response = new CaffeinePeriodResponse(
+                    startDate, endDate, total, avgPerDay
+            );
+
+            // 리스트 맨 앞에 추가하여 [1주차, 2주차, 3주차, 4주차] 순서로 저장
+            fourWeeksData.add(i, response);
+        }
+
+        return fourWeeksData;
+    }
+
+    //4개월간
+    public List<CaffeinePeriodResponse> getLastFourMonthsCaffeine(User user) {
+
+        List<CaffeinePeriodResponse> fourMonthsData = new ArrayList<>();
+        LocalDate today = LocalDate.now(KST);
+
+        // i=0 (현재 월)부터 i=3 (4개월 전)까지 반복
+        for (int i = 0; i < 4; i++) {
+
+            // 해당 월의 시작일과 다음 달의 시작일 계산
+            LocalDate targetMonth = today.minusMonths(i);
+            LocalDate firstDay = targetMonth.withDayOfMonth(1);
+            LocalDate firstDayNextMonth = firstDay.plusMonths(1);
+
+            // 해당 월의 마지막 날 (응답용)
+            LocalDate lastDay = firstDayNextMonth.minusDays(1);
+
+            // LocalDateTime으로 변환
+            LocalDateTime start = firstDay.atStartOfDay();
+            LocalDateTime end = firstDayNextMonth.atStartOfDay(); // DB 조회 시 다음 달 0시까지 포함
+
+            int total = caffeineIntakesRepository
+                    .sumCaffeineMgByUserAndPeriod(user, start, end);
+
+            // 기간 계산 (해당 월의 총 날짜 수)
+            long days = ChronoUnit.DAYS.between(firstDay, firstDayNextMonth);
+            double avgPerDay = days > 0 ? (double) total / days : 0.0;
+
+            CaffeinePeriodResponse response = new CaffeinePeriodResponse(
+                    firstDay, lastDay, total, avgPerDay
+            );
+
+            // 리스트 맨 앞에 추가하여 [현재 월, 1개월 전, 2개월 전, 3개월 전] 순서로 저장
+            fourMonthsData.add(i, response);
+        }
+
+        return fourMonthsData;
     }
 
     public CaffeineResponse.CaffeineByDayResponseDto getCaffeineByDay(User user, LocalDate date) {
