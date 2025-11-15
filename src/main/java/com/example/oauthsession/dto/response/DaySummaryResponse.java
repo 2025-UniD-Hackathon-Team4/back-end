@@ -1,6 +1,6 @@
 package com.example.oauthsession.dto.response;
 
-public record DailySummaryResponse(
+public record DaySummaryResponse(
         Long daySummaryId,
         int conditionScore,
         String conditionSummary

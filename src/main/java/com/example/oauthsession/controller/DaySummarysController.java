@@ -1,7 +1,7 @@
 package com.example.oauthsession.controller;
 
-import com.example.oauthsession.dto.request.DailySummaryRequest;
-import com.example.oauthsession.dto.response.DailySummaryResponse;
+import com.example.oauthsession.dto.request.DaySummarysRequest;
+import com.example.oauthsession.dto.response.DaySummaryResponse;
 import com.example.oauthsession.service.ConditionService;
 import jakarta.servlet.http.HttpSession;
 import lombok.RequiredArgsConstructor;
@@ -14,12 +14,12 @@ import reactor.core.publisher.Mono;
 @RestController
 @RequiredArgsConstructor
 @CrossOrigin(origins = "*")
-public class DaySummaryController {
+public class DaySummarysController {
     private final ConditionService conditionService;
 
     @PostMapping("/api/daily-summary")
-    public Mono<DailySummaryResponse> createDailySummary(@RequestBody DailySummaryRequest request,
-                                                         HttpSession session) {
+    public Mono<DaySummaryResponse> createDailySummary(@RequestBody DaySummarysRequest request,
+                                                       HttpSession session) {
         return conditionService.createDailySummary(request, session);
     }
 }
