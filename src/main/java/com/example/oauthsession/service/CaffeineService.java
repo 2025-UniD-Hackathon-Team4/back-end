@@ -36,6 +36,7 @@ public class CaffeineService {
                 .user(user)
                 .menuItem(menuItem)
                 .dateTime(request.getDateTime())
+                .caffeineMg(menuItem.getCaffeineMg())
                 .build();
 
         caffeineReposiory.save(intake);
