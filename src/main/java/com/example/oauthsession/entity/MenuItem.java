@@ -19,9 +19,7 @@ public class MenuItem {
 
     private String size;
 
-    private Integer price;
-
-    private Integer caffeine;
+    private Integer caffeineMg;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stores_id")
