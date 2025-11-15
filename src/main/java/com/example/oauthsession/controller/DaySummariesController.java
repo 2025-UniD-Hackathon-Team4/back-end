@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import reactor.core.publisher.Mono;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -74,6 +75,17 @@ public class DaySummariesController {
     }
 
     @Operation(
+            summary = "4주간 평균 수면 시간 조회",
+            description = "4주간 평균 수면 시간 조회 시간을 조회합니다"
+    )
+    @GetMapping("/api/sleepTime/fourWeek")
+    public ApiResponse<List<SleepAverageResponse>> getFourWeekSleep(HttpSession session){
+        User user = getUser(session);
+        List<SleepAverageResponse> weeklySleeps = daySummariesService.getFourWeekSleep(user);
+        return ApiResponse.onSuccess(weeklySleeps);
+    }
+
+    @Operation(
             summary = "월간 평균 수면 시간 조회",
             description = "월간 평균 수면 시간 조회 시간을 조회합니다"
     )
@@ -82,6 +94,17 @@ public class DaySummariesController {
         User user = getUser(session);
         SleepAverageResponse monthlySleep = daySummariesService.getMonthlySleep(user);
         return ApiResponse.onSuccess(monthlySleep);
+    }
+
+    @Operation(
+            summary = "4개월간 평균 수면 시간 조회",
+            description = "4개월간 평균 수면 시간 조회 시간을 조회합니다"
+    )
+    @GetMapping("/api/sleepTime/fourMonth")
+    public ApiResponse<List<SleepAverageResponse>> getFourMonthSleep(HttpSession session){
+        User user = getUser(session);
+        List<SleepAverageResponse> mothlySleeps = daySummariesService.getLastFourMonthsSleep(user);
+        return ApiResponse.onSuccess(mothlySleeps);
     }
 
     @Operation(
